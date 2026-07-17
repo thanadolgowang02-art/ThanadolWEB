@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Thanadol Editor — Dol Thanadol</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Sarabun:wght@300;400;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+<style>
+:root{--gold:#FFD000;--gold2:#FFA500;--black:#080808;--dark:#0f0f0f;--card:#161616;--text:#f5f5f5;--muted:#666;--border:#222;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--text);font-family:'Sarabun',sans-serif;overflow-x:hidden;}
+.sticky-nav{position:fixed;top:0;left:0;right:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:10px 16px;background:#0a0a0a;border-bottom:1px solid rgba(255,208,0,.2);}
+.sticky-nav span{font-family:'Caveat',cursive;font-weight:700;font-size:22px;color:var(--gold);letter-spacing:.5px;}
+@keyframes scaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s,transform .7s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* HERO */
+.hero{width:100%;position:relative;overflow:hidden;max-height:420px;cursor:pointer;}
+.hero-banner{width:100%;display:block;object-fit:cover;max-height:420px;animation:scaleIn 1.2s both;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.1) 40%,rgba(8,8,8,1) 100%);pointer-events:none;}
+.hero-bar{width:100%;height:5px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));}
+
+/* BIO */
+.bio-section{padding:48px 24px 20px;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;}
+.profile-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;text-decoration:none;color:inherit;cursor:pointer;transition:transform .3s;}
+.profile-wrap:hover{transform:scale(1.03);}
+.profile-ring{width:128px;height:128px;border-radius:50%;border:3px solid var(--gold);overflow:hidden;box-shadow:0 0 0 6px rgba(255,208,0,.08),0 12px 40px rgba(0,0,0,.6);animation:scaleIn .9s .3s both;}
+.profile-ring img{width:100%;height:100%;object-fit:cover;object-position:top;}
+.hero-name{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(52px,13vw,100px);color:var(--gold);letter-spacing:3px;line-height:1;text-shadow:0 4px 24px rgba(255,208,0,.25);animation:fadeUp .8s .4s both;}
+.hero-tagline{font-family:'Montserrat',sans-serif;font-weight:600;font-size:clamp(11px,2.5vw,14px);color:var(--muted);letter-spacing:4px;text-transform:uppercase;animation:fadeUp .8s .5s both;}
+.hero-tagline span{color:var(--gold);}
+.hero-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;animation:fadeUp .8s .6s both;}
+.tag{background:rgba(255,208,0,.07);border:1px solid rgba(255,208,0,.2);color:var(--gold);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;}
+.bio-desc{max-width:480px;font-size:14px;color:#888;line-height:1.85;margin-top:4px;}
+.section-divider{width:90%;max-width:560px;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:8px auto;}
+.section-label{font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--muted);text-align:center;padding:8px 0 0;}
+
+/* LINKS */
+.links-section{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:36px;}
+.block-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:var(--text);letter-spacing:1px;margin-bottom:14px;}
+.block-title span{color:var(--gold);}
+.link-group{width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px;}
+.contact-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:14px;text-decoration:none;color:var(--text);transition:all .25s;}
+.contact-row:hover{border-color:var(--gold);box-shadow:0 4px 20px rgba(255,208,0,.12);transform:translateX(4px);}
+.c-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;}
+.c-info{display:flex;flex-direction:column;gap:2px;}
+.c-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-family:'Montserrat',sans-serif;font-weight:600;}
+.c-value{font-size:15px;color:var(--gold);font-weight:700;}
+.c-arrow{margin-left:auto;color:var(--muted);font-size:20px;opacity:.5;}
+.follow-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:520px;}
+.follow-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;text-decoration:none;color:var(--text);transition:all .25s;}
+.follow-btn:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 8px 28px rgba(255,208,0,.15);}
+.f-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+.f-name{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-family:'Montserrat',sans-serif;}
+.f-handle{font-size:12px;color:var(--gold);font-weight:700;}
+svg{display:block;}
+
+/* SERVICES */
+.service-section{padding:60px 24px;background:var(--dark);display:flex;flex-direction:column;align-items:center;gap:8px;}
+.service-label{font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;opacity:.7;}
+.service-heading{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(40px,10vw,72px);color:var(--gold);letter-spacing:1px;margin-bottom:24px;text-align:center;text-shadow:0 4px 30px rgba(255,208,0,.3);}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;width:100%;max-width:980px;align-items:stretch;}
+.services-grid .service-card,.services-grid .product-card{display:flex;flex-direction:column;}
+.services-grid .service-list{flex:1;}
+.featured-card{grid-column:1/-1;background:linear-gradient(135deg,#1a1500,#161616 60%);border:3px solid var(--gold);border-radius:24px;padding:36px 28px;text-align:center;position:relative;overflow:hidden;cursor:pointer;transition:all .3s;box-shadow:0 0 60px rgba(255,208,0,.08);}
+.featured-card:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(255,208,0,.25);}
+.featured-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));}
+.featured-badge{display:inline-block;background:var(--gold);color:#000;padding:5px 16px;border-radius:20px;font-size:11px;font-weight:900;font-family:'Montserrat',sans-serif;letter-spacing:1.5px;margin-bottom:12px;}
+.featured-title{font-family:'Caveat',cursive;font-weight:700;font-size:48px;color:var(--gold);margin-bottom:8px;line-height:1;}
+.featured-sub{font-size:14px;color:var(--muted);margin-bottom:18px;}
+.featured-grid-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:18px 0;text-align:left;max-width:600px;margin-left:auto;margin-right:auto;}
+.featured-grid-list li{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#ddd;list-style:none;}
+.featured-grid-list li::before{content:'✓';color:var(--gold);font-weight:900;flex-shrink:0;}
+.featured-price-row{display:flex;align-items:baseline;justify-content:center;gap:10px;margin-top:18px;flex-wrap:wrap;}
+.featured-price-old{font-family:'Montserrat',sans-serif;font-size:20px;color:#666;text-decoration:line-through;}
+.featured-price-new{font-family:'Montserrat',sans-serif;font-weight:900;font-size:40px;color:var(--gold);}
+.service-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px;text-align:center;position:relative;overflow:hidden;cursor:pointer;transition:all .3s;}
+.service-card:hover{border-color:var(--gold);box-shadow:0 16px 48px rgba(255,208,0,.12);transform:translateY(-4px);}
+.service-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.service-icon{font-size:38px;margin-bottom:10px;}
+.service-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:18px;color:var(--gold);letter-spacing:.5px;margin-bottom:6px;}
+.service-title-script{font-family:'Caveat',cursive;font-weight:700;font-size:34px;color:var(--gold);margin-bottom:4px;line-height:1.15;min-height:42px;display:flex;align-items:center;justify-content:center;text-align:center;}
+.service-sub{font-size:13px;color:var(--muted);margin-bottom:12px;min-height:34px;display:flex;align-items:center;justify-content:center;}
+.service-list{list-style:none;display:flex;flex-direction:column;gap:7px;margin:12px 0;text-align:left;}
+.service-list li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#ccc;line-height:1.5;}
+.service-list li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0;}
+.price-badge{display:inline-block;background:var(--gold);color:#000;font-family:'Montserrat',sans-serif;font-weight:900;font-size:20px;padding:8px 22px;border-radius:50px;letter-spacing:1px;margin-top:12px;}
+.price-dual{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+.price-dual .price-badge{font-size:14px;padding:6px 14px;}
+.click-hint{font-size:11px;color:var(--muted);margin-top:8px;}
+
+/* PRODUCT CARD */
+.product-card{background:var(--card);border:2px solid rgba(255,208,0,.3);border-radius:20px;padding:26px;text-align:center;position:relative;overflow:hidden;cursor:pointer;transition:all .3s;}
+.product-card:hover{border-color:var(--gold);box-shadow:0 16px 48px rgba(255,208,0,.18);transform:translateY(-4px);}
+.product-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.product-badge-tag{display:inline-block;background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.4);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Montserrat',sans-serif;letter-spacing:1px;margin-bottom:10px;}
+
+/* REVIEWS */
+.review-section{padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:24px;}
+.review-header-row{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:560px;flex-wrap:wrap;gap:12px;}
+.review-section-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:28px;color:var(--text);}
+.review-section-title span{color:var(--gold);}
+.write-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--gold);color:#000;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:13px;cursor:pointer;transition:all .25s;}
+.write-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,208,0,.3);}
+.stats-bar{display:flex;align-items:center;gap:24px;padding:16px 24px;background:var(--card);border:1px solid var(--border);border-radius:14px;width:100%;max-width:560px;flex-wrap:wrap;justify-content:center;}
+.stat-num{font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;color:var(--gold);}
+.stat-label{font-size:11px;color:var(--muted);margin-top:2px;text-align:center;}
+.reviews-grid{display:flex;flex-direction:column;gap:14px;width:100%;max-width:560px;}
+.review-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color .25s;animation:slideIn .4s both;}
+.review-card:hover{border-color:rgba(255,208,0,.3);}
+.review-card-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.review-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#ff8c00);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:900;font-size:16px;color:#000;flex-shrink:0;}
+.review-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:var(--text);}
+.review-date{font-size:11px;color:var(--muted);margin-top:2px;}
+.review-stars{font-size:14px;letter-spacing:2px;margin-bottom:6px;}
+.review-text{font-size:14px;color:#bbb;line-height:1.7;}
+.review-tag-chip{display:inline-block;margin-top:8px;padding:3px 10px;background:rgba(255,208,0,.08);border:1px solid rgba(255,208,0,.2);border-radius:20px;font-size:11px;color:var(--gold);font-weight:600;}
+
+/* ALL MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--card);border:1px solid var(--gold);border-radius:20px;padding:28px;width:100%;max-width:520px;position:relative;max-height:90vh;overflow-y:auto;animation:slideIn .3s both;}
+.page-content-box{background:var(--card);border:none;border-radius:20px;padding:28px;width:100%;position:relative;overflow:visible;}
+.modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;transition:color .2s;}
+.modal-close:hover{color:var(--gold);}
+.modal-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:var(--gold);letter-spacing:1px;margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:18px;}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.form-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.form-input{background:#1e1e1e;border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:15px;transition:border-color .2s;outline:none;width:100%;}
+.form-input:focus{border-color:var(--gold);}
+.form-textarea{resize:vertical;min-height:90px;}
+.star-selector{display:flex;gap:6px;flex-direction:row-reverse;justify-content:flex-end;}
+.star-selector input{display:none;}
+.star-selector label{font-size:28px;cursor:pointer;color:#333;transition:color .15s;}
+.star-selector label:hover,.star-selector label:hover~label,.star-selector input:checked~label{color:var(--gold);}
+.tag-selector{display:flex;gap:8px;flex-wrap:wrap;}
+.tag-option{padding:6px 14px;background:#1e1e1e;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .2s;}
+.tag-option.selected{background:rgba(255,208,0,.1);border-color:var(--gold);color:var(--gold);}
+.submit-btn{width:100%;padding:14px;background:var(--gold);color:#000;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:15px;cursor:pointer;transition:all .25s;margin-top:8px;}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,208,0,.3);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.success-msg{display:none;text-align:center;padding:24px;flex-direction:column;align-items:center;gap:12px;}
+.success-msg.show{display:flex;}
+.drive-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px;background:linear-gradient(135deg,#1a73e8,#0d5fc0);color:#fff;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;margin-bottom:18px;transition:all .3s;}
+.drive-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,115,232,.4);}
+.divider{border:none;border-top:1px solid var(--border);margin:18px 0;}
+.m-list{display:flex;flex-direction:column;gap:10px;}
+.m-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#1c1c1c;border-radius:10px;text-decoration:none;color:var(--text);border:1px solid #2a2a2a;transition:all .2s;}
+.m-row:hover{border-color:var(--gold);}
+.m-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.m-plat{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Montserrat',sans-serif;}
+.m-val{font-size:14px;color:var(--gold);font-weight:700;}
+
+/* PRODUCT MODAL */
+.product-modal-box{background:var(--card);border:1px solid var(--gold);border-radius:20px;padding:0;width:100%;max-width:640px;position:relative;max-height:90vh;overflow-y:auto;animation:slideIn .3s both;}
+.product-modal-header{padding:24px 24px 0;}
+.product-video-wrap{width:100%;border-radius:0;overflow:hidden;background:#000;margin:16px 0 0;display:flex;justify-content:center;}
+.product-video{width:auto;max-width:100%;height:auto;max-height:500px;display:block;object-fit:contain;background:#000;}
+.product-modal-body{padding:20px 24px 24px;}
+.product-desc{font-size:14px;color:#bbb;line-height:1.8;margin-bottom:16px;}
+.feature-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.feature-mini{background:#1e1e1e;border-radius:10px;padding:10px 12px;font-size:12px;color:#bbb;display:flex;align-items:center;gap:8px;}
+.feature-mini span{color:var(--gold);font-weight:700;}
+.buy-block{background:#111;border:1px solid rgba(255,208,0,.3);border-radius:14px;padding:18px;text-align:center;}
+.buy-price-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-family:'Montserrat',sans-serif;}
+.buy-price-big{font-family:'Montserrat',sans-serif;font-weight:900;font-size:44px;color:var(--gold);line-height:1;margin:4px 0 8px;}
+.buy-price-big span{font-size:18px;color:var(--muted);font-weight:600;}
+.buy-main-btn{display:block;width:100%;padding:15px;background:var(--gold);color:#000;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:17px;cursor:pointer;transition:all .25s;margin-bottom:10px;letter-spacing:.5px;}
+.buy-main-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,208,0,.35);}
+.buy-note-text{font-size:12px;color:var(--muted);line-height:1.6;}
+.buy-note-text span{color:var(--gold);}
+
+/* QR MODAL (white bg) */
+.qr-modal-box{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:360px;text-align:center;position:relative;animation:slideIn .3s both;}
+.qr-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#666;font-size:22px;cursor:pointer;}
+.qr-modal-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:20px;color:#111;margin-bottom:4px;}
+.qr-modal-sub{font-size:13px;color:#888;margin-bottom:14px;}
+.qr-img{width:210px;height:210px;object-fit:contain;margin:0 auto 10px;display:block;}
+.qr-amount{font-family:'Montserrat',sans-serif;font-weight:900;font-size:34px;color:#111;}
+.qr-amount span{font-size:16px;color:#888;font-weight:600;}
+.qr-name{font-size:13px;color:#555;margin-top:2px;}
+.qr-steps{text-align:left;background:#f5f5f5;border-radius:10px;padding:12px 14px;margin-top:14px;}
+.qr-step{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#444;margin-bottom:7px;line-height:1.5;}
+.qr-step:last-child{margin-bottom:0;}
+.qr-step-num{width:20px;height:20px;border-radius:50%;background:#FFD000;color:#000;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.line-pay-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;padding:12px;background:linear-gradient(135deg,#06c755,#04a543);color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;transition:all .25s;}
+.line-pay-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(6,199,85,.35);}
+
+/* CONSULTING */
+.consult-detail{background:#1a1a1a;border-radius:12px;padding:16px;margin-bottom:12px;}
+.consult-detail-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:var(--gold);margin-bottom:10px;}
+.consult-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.consult-list li{font-size:13px;color:#bbb;display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
+.consult-list li::before{content:'•';color:var(--gold);flex-shrink:0;}
+.pkg-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#1c1c1c;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;}
+.pkg-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:var(--text);}
+.pkg-price{font-family:'Montserrat',sans-serif;font-weight:900;font-size:16px;color:var(--gold);}
+
+/* ABOUT */
+.about-section{padding:60px 24px;display:flex;flex-direction:column;align-items:center;}
+.about-quote{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(22px,5vw,36px);color:var(--text);text-align:center;margin-bottom:40px;line-height:1.3;}
+.about-quote span{color:var(--gold);}
+.about-inner{display:flex;flex-direction:row;align-items:flex-start;gap:28px;width:100%;max-width:760px;}
+.about-text{flex:1;min-width:0;}
+.about-text p{font-size:15px;color:#bbb;line-height:1.9;}
+.about-text p+p{margin-top:12px;}
+.about-line-btn{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:12px 22px;background:linear-gradient(135deg,#06c755,#04a543);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;transition:all .25s;}
+.about-line-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(6,199,85,.35);}
+.about-photos{display:flex;flex-direction:column;flex-shrink:0;width:220px;position:relative;height:340px;}
+.about-photos img{width:140px;height:180px;object-fit:cover;border-radius:14px;border:2px solid var(--border);position:absolute;transition:transform .3s;}
+.about-photos img:first-child{top:0;left:0;z-index:2;box-shadow:4px 4px 24px rgba(0,0,0,.6);}
+.about-photos img:last-child{top:160px;left:70px;z-index:1;filter:brightness(.85);}
+.about-photos:hover img:first-child{transform:rotate(-3deg) translateX(-6px);}
+.about-photos:hover img:last-child{transform:rotate(3deg) translateX(6px);filter:brightness(1);}
+
+/* SOCIAL PROOF */
+.social-proof{padding:40px 24px 60px;display:flex;flex-direction:column;align-items:center;gap:28px;}
+.platform-card{width:100%;max-width:520px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all .3s;text-decoration:none;color:var(--text);}
+.platform-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 28px rgba(255,208,0,.12);}
+.platform-header{display:flex;align-items:center;gap:14px;padding:18px 20px;}
+.platform-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.platform-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.8;margin-bottom:4px;}
+.platform-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:var(--text);}
+.platform-handle{font-size:12px;color:var(--muted);margin-top:2px;}
+.platform-screenshot{width:100%;display:block;object-fit:cover;max-height:220px;object-position:top;border-top:1px solid var(--border);opacity:.85;transition:opacity .3s;}
+.platform-card:hover .platform-screenshot{opacity:1;}
+.platform-cta{display:flex;align-items:center;justify-content:center;padding:14px;border-top:1px solid var(--border);font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
+
+/* MOTTO */
+.motto-section{padding:60px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;}
+.motto-section::before{content:'THANADOL';position:absolute;font-family:'Montserrat',sans-serif;font-weight:900;font-size:18vw;color:rgba(255,208,0,.025);letter-spacing:8px;pointer-events:none;white-space:nowrap;}
+.motto-list{display:flex;flex-direction:column;gap:6px;position:relative;z-index:1;}
+.motto-item{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(28px,7vw,56px);letter-spacing:5px;color:#222;transition:color .4s,text-shadow .4s;text-transform:uppercase;}
+.motto-item.active{color:var(--gold);text-shadow:0 0 30px rgba(255,208,0,.3);}
+footer{padding:28px 20px;text-align:center;border-top:1px solid var(--border);color:var(--muted);font-size:13px;}
+footer span{color:var(--gold);}
+@media(max-width:560px){
+  .about-inner{flex-direction:column-reverse;}
+  .about-photos{width:100%;height:280px;}
+  .about-photos img{width:120px;height:155px;}
+  .about-photos img:last-child{top:120px;left:50%;transform:translateX(-10px);}
+  .services-grid{grid-template-columns:1fr;}
+  .feature-mini-grid{grid-template-columns:1fr;}
+}
+
+.side-label{position:relative;text-align:right;padding:0 24px;margin-top:48px;margin-bottom:0;}
+.side-label-inner{font-family:'Caveat',cursive;font-weight:700;font-size:24px;color:#aaa;letter-spacing:.5px;}
+.side-label-inner .num{font-family:'Montserrat',sans-serif;color:var(--gold);font-weight:900;font-size:24px;margin-left:8px;letter-spacing:1px;}
+</style>
+
+<style>
+.page-wrap{max-width:1100px;margin:80px auto 60px;padding:0 32px;}
+.page-modal-box{background:transparent;border:none;border-radius:0;padding:0;}
+.nav-back-row{padding:0;margin-bottom:0;}
+.nav-back{font-size:13px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s;margin-bottom:16px;}
+.nav-back:hover{color:var(--gold);}
+</style>
+
+</head>
+<body>
+
+<div class="sticky-nav"><span>Dol Thanadol</span></div>
+
+<div class="page-wrap" style="">
+  <a href="index.html" class="nav-back">← กลับหน้าหลัก</a>
+  <div class="page-modal-box reveal visible" style="position:relative;">
+<div class="page-content-box">
+        <div class="modal-title" style="font-family:'Caveat',cursive;font-size:36px;">🎬 Thanadol Editor</div>
+    <p class="modal-sub">ดูตัวอย่างผลงานทั้งหมดได้ที่ Google Drive</p>
+    <a href="https://buy.stripe.com/bJe00l5Lb9K5dU4aiQ6Zy05" target="_blank" class="line-pay-btn" style="background:linear-gradient(135deg,#FFD000,#FFA500);color:#000;margin-bottom:10px;">
+      ✨ สนใจ — เริ่มต้น 350 บาท
+    </a>
+    <a href="https://drive.google.com/drive/folders/1MpoGwAXMTm3l-5VobksEb2vkAOJ9vrxB" target="_blank" class="drive-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M4.433 22l-2.433-4.231 5.878-10.18 2.433 4.231zm7.567-4.231H2.567L.133 22H9.9zm5.9-5.769l-5.9-10.18L9.567 6H20l2.433 4.231zM24 18.231L21.567 14H11.433L9 18.231z"/></svg>
+      ดูผลงานใน Google Drive
+    </a>
+    <hr class="divider">
+  <div class="review-header-row">
+    <div class="review-section-title" style="font-size:22px;">⭐ <span>รีวิว</span></div>
+    <button class="write-btn" onclick="openWriteReview()">✍️ เขียนรีวิว</button>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="avgStar">—</div><div class="stat-label">คะแนนเฉลี่ย</div></div>
+    <div class="stat-item"><div class="stat-num" id="totalReviews">0</div><div class="stat-label">รีวิวทั้งหมด</div></div>
+    <div class="stat-item"><div class="stat-num" id="fiveStars">0</div><div class="stat-label">5 ดาว ⭐⭐⭐⭐⭐</div></div>
+  </div>
+  <div class="reviews-grid" id="reviewsGrid"></div>
+    <hr class="divider">
+    <p style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;color:var(--gold);margin-bottom:12px;">📬 ติดต่อ</p>
+    <div class="m-list">
+      <a href="tel:0625095535" class="m-row"><div class="m-icon" style="background:#2a2a2a;font-size:16px;">📞</div><div><div class="m-plat">โทรศัพท์</div><div class="m-val">062-509-5535</div></div></a>
+      <a href="https://line.me/ti/p/~1324756789" target="_blank" class="m-row"><div class="m-icon" style="background:linear-gradient(135deg,#06c755,#04a543);"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg></div><div><div class="m-plat">LINE</div><div class="m-val">1324756789</div></div></a>
+      <a href="https://www.facebook.com/profile.php?id=61589976377119" target="_blank" class="m-row"><div class="m-icon" style="background:linear-gradient(135deg,#1877f2,#0d5fc0);"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div><div><div class="m-plat">Facebook</div><div class="m-val">Thanadol</div></div></a>
+    </div>
+    <hr class="divider">
+    <p style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:var(--gold);margin-bottom:12px;">📱 ติดตามช่องทางอื่น</p>
+    <div class="follow-grid">
+      <a href="https://www.tiktok.com/@_dolthanadol" target="_blank" class="follow-btn">
+        <div class="f-icon" style="background:#111;border:1px solid #333;"><svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg></div>
+        <span class="f-name">TikTok</span><span class="f-handle">@_dolthanadol</span>
+      </a>
+      <a href="https://www.youtube.com/@thanadol.comv2" target="_blank" class="follow-btn">
+        <div class="f-icon" style="background:linear-gradient(135deg,#ff0000,#cc0000);"><svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></div>
+        <span class="f-name">YouTube</span><span class="f-handle">@thanadol.comv2</span>
+      </a>
+      <a href="https://www.instagram.com/dolthanadol1/" target="_blank" class="follow-btn">
+        <div class="f-icon" style="background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);"><svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></div>
+        <span class="f-name">Instagram</span><span class="f-handle">@dolthanadol1</span>
+      </a>
+      <a href="https://www.facebook.com/profile.php?id=61589976377119" target="_blank" class="follow-btn">
+        <div class="f-icon" style="background:linear-gradient(135deg,#1877f2,#0d5fc0);"><svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div>
+        <span class="f-name">Facebook</span><span class="f-handle">Thanadol</span>
+      </a>
+    </div>
+  </div>
+  </div>
+</div>
+
+
+<!-- WRITE REVIEW MODAL -->
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeWriteReview()">✕</button>
+    <div id="formView">
+      <div class="modal-title">✍️ เขียนรีวิว</div>
+      <p class="modal-sub">แชร์ประสบการณ์ใช้บริการของคุณ</p>
+      <div class="form-group">
+        <label class="form-label">ชื่อของคุณ *</label>
+        <input class="form-input" id="inputName" type="text" placeholder="พิมพ์ชื่อของคุณ..." maxlength="40">
+      </div>
+      <div class="form-group">
+        <label class="form-label">คะแนน *</label>
+        <div class="star-selector">
+          <input type="radio" name="stars" id="s5" value="5"><label for="s5">★</label>
+          <input type="radio" name="stars" id="s4" value="4"><label for="s4">★</label>
+          <input type="radio" name="stars" id="s3" value="3"><label for="s3">★</label>
+          <input type="radio" name="stars" id="s2" value="2"><label for="s2">★</label>
+          <input type="radio" name="stars" id="s1" value="1"><label for="s1">★</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">บริการที่ใช้</label>
+        <div class="tag-selector">
+          <span class="tag-option" onclick="toggleTag(this)">ตัดต่อวิดีโอ</span>
+          <span class="tag-option" onclick="toggleTag(this)">ที่ปรึกษาคอนเทนต์</span>
+          <span class="tag-option" onclick="toggleTag(this)">ที่ปรึกษาการเงิน</span>
+          <span class="tag-option" onclick="toggleTag(this)">Goal Tracker</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รีวิว *</label>
+        <textarea class="form-input form-textarea" id="inputReview" placeholder="บอกเล่าประสบการณ์ใช้บริการ..." maxlength="300"></textarea>
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="submitReview()">โพสต์รีวิว</button>
+    </div>
+    <div class="success-msg" id="successMsg">
+      <div style="font-size:48px;">🎉</div>
+      <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:18px;color:var(--gold);">ขอบคุณสำหรับรีวิว!</div>
+      <p style="font-size:13px;color:var(--muted);">รีวิวของคุณถูกโพสต์แล้วครับ</p>
+      <button class="write-btn" onclick="closeWriteReview()" style="margin-top:8px;">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 <span>Dol Thanadol</span> · Start From 0 | Grow Everyday</p>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// Reviews
+const RKEY='thanadol_reviews_v4';
+const defaults=[
+  {id:1,name:'คุณนิว',stars:5,tag:'ตัดต่อวิดีโอ',text:'ตัดต่อสวยมากครับ ส่งงานเร็วกว่าที่นัดไว้ด้วย ประทับใจมากๆ จะกลับมาจ้างอีกแน่นอน',date:Date.now()-3600000*2},
+  {id:2,name:'พี่แอม',stars:5,tag:'ตัดต่อวิดีโอ',text:'น้องทำได้ดีมากเลย เพิ่งอายุ 12 แต่งานโปรมากๆ แก้ไขให้ด้วยโดยไม่มีบ่น 5 ดาวเต็มๆ ครับ',date:Date.now()-3600000*5},
+  {id:3,name:'ร้านกาแฟ Mild',stars:5,tag:'ที่ปรึกษาคอนเทนต์',text:'คุยกับน้องแล้วได้ไอเดียเยอะมากครับ ช่วยวางแผนคอนเทนต์ได้ดีเลย น่าประทับใจมากสำหรับเด็กอายุ 12',date:Date.now()-3600000*8}
+];
+function loadR(){try{const s=localStorage.getItem(RKEY);return s?JSON.parse(s):defaults;}catch{return defaults;}}
+function saveR(r){try{localStorage.setItem(RKEY,JSON.stringify(r));}catch{}}
+function starsH(n){return'⭐'.repeat(n)+(n<5?'☆'.repeat(5-n):'');}
+function timeAgo(ts){const d=Math.floor((Date.now()-ts)/3600000);if(d<1)return'เมื่อกี้';if(d<24)return d+' ชม.ที่แล้ว';const days=Math.floor(d/24);if(days<30)return days+' วันที่แล้ว';return Math.floor(days/30)+' เดือนที่แล้ว';}
+function renderR(rOverride){
+  const r=rOverride||loadR();
+  const total=r.length;
+  const avg=total?(r.reduce((s,x)=>s+x.stars,0)/total).toFixed(1):'—';
+  const five=r.filter(x=>x.stars===5).length;
+  document.getElementById('avgStar').textContent=total?avg+'⭐':'—';
+  document.getElementById('totalReviews').textContent=total;
+  document.getElementById('fiveStars').textContent=five;
+  const grid=document.getElementById('reviewsGrid');
+  if(!total){grid.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted);">💬 ยังไม่มีรีวิว เป็นคนแรกได้เลย!</div>';return;}
+  grid.innerHTML=r.map(x=>`
+    <div class="review-card">
+      <div class="review-card-top">
+        <div class="review-avatar">${x.name.charAt(0).toUpperCase()}</div>
+        <div><div class="review-name">${x.name}</div><div class="review-date">${timeAgo(x.date)}</div></div>
+      </div>
+      <div class="review-stars">${starsH(x.stars)}</div>
+      <div class="review-text">${x.text}</div>
+      ${x.tag?`<span class="review-tag-chip">${x.tag}</span>`:''}
+    </div>
+  `).join('');
+}
+function toggleTag(el){document.querySelectorAll('.tag-option').forEach(t=>t.classList.remove('selected'));el.classList.add('selected');}
+function openWriteReview(){
+  document.getElementById('reviewModal').classList.add('open');
+  document.getElementById('formView').style.display='block';
+  document.getElementById('successMsg').classList.remove('show');
+}
+function closeWriteReview(){
+  document.getElementById('reviewModal').classList.remove('open');
+  document.getElementById('inputName').value='';
+  document.getElementById('inputReview').value='';
+  document.querySelectorAll('input[name="stars"]').forEach(r=>r.checked=false);
+  document.querySelectorAll('.tag-option').forEach(t=>t.classList.remove('selected'));
+}
+function submitReview(){
+  const name=document.getElementById('inputName').value.trim();
+  const starsEl=document.querySelector('input[name="stars"]:checked');
+  const text=document.getElementById('inputReview').value.trim();
+  const tagEl=document.querySelector('.tag-option.selected');
+  if(!name){alert('กรุณาใส่ชื่อครับ');return;}
+  if(!starsEl){alert('กรุณาเลือกคะแนนดาวครับ');return;}
+  if(!text){alert('กรุณาเขียนรีวิวครับ');return;}
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;btn.textContent='กำลังโพสต์...';
+  setTimeout(()=>{
+    const reviews=loadR();
+    reviews.unshift({id:Date.now(),name,stars:parseInt(starsEl.value),tag:tagEl?tagEl.textContent:'',text,date:Date.now()});
+    saveR(reviews);renderR(reviews);
+    document.getElementById('formView').style.display='none';
+    document.getElementById('successMsg').classList.add('show');
+    btn.disabled=false;btn.textContent='โพสต์รีวิว';
+  },600);
+}
+document.getElementById('reviewModal').addEventListener('click',function(e){if(e.target===this)closeWriteReview();});
+renderR();
+document.getElementById('reviewModal').addEventListener('click',function(e){if(e.target===this)closeWriteReview();});
+
+</script>
+</body>
+</html>
