@@ -378,11 +378,10 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 // Reviews
 const RKEY='thanadol_reviews_v4';
-const defaults=[
-  {id:1,name:'คุณนิว',stars:5,tag:'ตัดต่อวิดีโอ',text:'ตัดต่อสวยมากครับ ส่งงานเร็วกว่าที่นัดไว้ด้วย ประทับใจมากๆ จะกลับมาจ้างอีกแน่นอน',date:Date.now()-3600000*2},
-  {id:2,name:'พี่แอม',stars:5,tag:'ตัดต่อวิดีโอ',text:'น้องทำได้ดีมากเลย เพิ่งอายุ 12 แต่งานโปรมากๆ แก้ไขให้ด้วยโดยไม่มีบ่น 5 ดาวเต็มๆ ครับ',date:Date.now()-3600000*5},
-  {id:3,name:'ร้านกาแฟ Mild',stars:5,tag:'ที่ปรึกษาคอนเทนต์',text:'คุยกับน้องแล้วได้ไอเดียเยอะมากครับ ช่วยวางแผนคอนเทนต์ได้ดีเลย น่าประทับใจมากสำหรับเด็กอายุ 12',date:Date.now()-3600000*8}
-];
+/* รีวิวจริงเท่านั้น — ลูกค้าคนไหนรีวิวมาทาง LINE ค่อยเอามาใส่ที่นี่
+   รูปแบบ: {id:1,name:'ชื่อ',stars:5,tag:'ตัดต่อวิดีโอ',text:'ข้อความ',date:Date.parse('2026-10-20')}
+   อย่าใส่รีวิวสมมติ ถ้าลูกค้าขอดูงานที่อ้างถึงแล้วไม่มี จะเสียความน่าเชื่อถือทันที */
+const defaults=[];
 function loadR(){try{const s=localStorage.getItem(RKEY);return s?JSON.parse(s):defaults;}catch{return defaults;}}
 function saveR(r){try{localStorage.setItem(RKEY,JSON.stringify(r));}catch{}}
 function starsH(n){return'⭐'.repeat(n)+(n<5?'☆'.repeat(5-n):'');}
