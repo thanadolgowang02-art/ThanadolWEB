@@ -281,16 +281,25 @@ footer span{color:var(--gold);}
       ดูผลงานใน Google Drive
     </a>
     <hr class="divider">
-  <div class="review-header-row">
-    <div class="review-section-title" style="font-size:22px;">⭐ <span>รีวิว</span></div>
-    <button class="write-btn" onclick="openWriteReview()">✍️ เขียนรีวิว</button>
-  </div>
-  <div class="stats-bar">
-    <div class="stat-item"><div class="stat-num" id="avgStar">—</div><div class="stat-label">คะแนนเฉลี่ย</div></div>
-    <div class="stat-item"><div class="stat-num" id="totalReviews">0</div><div class="stat-label">รีวิวทั้งหมด</div></div>
-    <div class="stat-item"><div class="stat-num" id="fiveStars">0</div><div class="stat-label">5 ดาว ⭐⭐⭐⭐⭐</div></div>
-  </div>
-  <div class="reviews-grid" id="reviewsGrid"></div>
+
+    <!-- เสียงจากลูกค้าจริงเท่านั้น — ไม่มีระบบให้คนเขียนเอง ดลใส่เองทีละอัน
+         จะเพิ่มอันใหม่ ให้ก๊อป <div class="review-card">...</div> ทั้งก้อนแล้วแก้ข้อความ -->
+    <p style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;color:var(--gold);margin-bottom:14px;">⭐ เสียงจากลูกค้า</p>
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-card-top">
+          <div class="review-avatar">S</div>
+          <div>
+            <div class="review-name">Sports Like Futsal</div>
+            <div class="review-date">ลูกค้าจริงจาก TikTok · 16 หัวใจ</div>
+          </div>
+        </div>
+        <div class="review-stars">⭐⭐⭐⭐⭐</div>
+        <div class="review-text">ผมทัน 20 คนแรก น้องใส่ใจ ตั้งใจมากๆ เรทประมาณนี้ สำหรับผมโอเคครับ ถูกใจ ฝีมือเกินอายุน้องมากๆ ไว้จะกลับมาใช้บริการอีกครับ ผมถ่ายวิดีโอบ่อย ขอบคุณน้องมากๆ</div>
+        <span class="review-tag-chip">ที่ปรึกษา 20 คนแรก</span>
+      </div>
+    </div>
+
     <hr class="divider">
     <p style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;color:var(--gold);margin-bottom:12px;">📬 ติดต่อ</p>
     <div class="m-list">
@@ -323,51 +332,6 @@ footer span{color:var(--gold);}
 </div>
 
 
-<!-- WRITE REVIEW MODAL -->
-<div class="modal-overlay" id="reviewModal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeWriteReview()">✕</button>
-    <div id="formView">
-      <div class="modal-title">✍️ เขียนรีวิว</div>
-      <p class="modal-sub">แชร์ประสบการณ์ใช้บริการของคุณ</p>
-      <div class="form-group">
-        <label class="form-label">ชื่อของคุณ *</label>
-        <input class="form-input" id="inputName" type="text" placeholder="พิมพ์ชื่อของคุณ..." maxlength="40">
-      </div>
-      <div class="form-group">
-        <label class="form-label">คะแนน *</label>
-        <div class="star-selector">
-          <input type="radio" name="stars" id="s5" value="5"><label for="s5">★</label>
-          <input type="radio" name="stars" id="s4" value="4"><label for="s4">★</label>
-          <input type="radio" name="stars" id="s3" value="3"><label for="s3">★</label>
-          <input type="radio" name="stars" id="s2" value="2"><label for="s2">★</label>
-          <input type="radio" name="stars" id="s1" value="1"><label for="s1">★</label>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">บริการที่ใช้</label>
-        <div class="tag-selector">
-          <span class="tag-option" onclick="toggleTag(this)">ตัดต่อวิดีโอ</span>
-          <span class="tag-option" onclick="toggleTag(this)">ที่ปรึกษาคอนเทนต์</span>
-          <span class="tag-option" onclick="toggleTag(this)">ที่ปรึกษาการเงิน</span>
-          <span class="tag-option" onclick="toggleTag(this)">Goal Tracker</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">รีวิว *</label>
-        <textarea class="form-input form-textarea" id="inputReview" placeholder="บอกเล่าประสบการณ์ใช้บริการ..." maxlength="300"></textarea>
-      </div>
-      <button class="submit-btn" id="submitBtn" onclick="submitReview()">โพสต์รีวิว</button>
-    </div>
-    <div class="success-msg" id="successMsg">
-      <div style="font-size:48px;">🎉</div>
-      <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:18px;color:var(--gold);">ขอบคุณสำหรับรีวิว!</div>
-      <p style="font-size:13px;color:var(--muted);">รีวิวของคุณถูกโพสต์แล้วครับ</p>
-      <button class="write-btn" onclick="closeWriteReview()" style="margin-top:8px;">ปิด</button>
-    </div>
-  </div>
-</div>
-
 <footer>
   <p>© 2026 <span>Dol Thanadol</span> · Start From 0 | Grow Everyday</p>
 </footer>
@@ -375,74 +339,6 @@ footer span{color:var(--gold);}
 <script>
 const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')}),{threshold:.1});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-
-// Reviews
-const RKEY='thanadol_reviews_v4';
-/* รีวิวจริงเท่านั้น — ลูกค้าคนไหนรีวิวมาทาง LINE ค่อยเอามาใส่ที่นี่
-   รูปแบบ: {id:1,name:'ชื่อ',stars:5,tag:'ตัดต่อวิดีโอ',text:'ข้อความ',date:Date.parse('2026-10-20')}
-   อย่าใส่รีวิวสมมติ ถ้าลูกค้าขอดูงานที่อ้างถึงแล้วไม่มี จะเสียความน่าเชื่อถือทันที */
-const defaults=[];
-function loadR(){try{const s=localStorage.getItem(RKEY);return s?JSON.parse(s):defaults;}catch{return defaults;}}
-function saveR(r){try{localStorage.setItem(RKEY,JSON.stringify(r));}catch{}}
-function starsH(n){return'⭐'.repeat(n)+(n<5?'☆'.repeat(5-n):'');}
-function timeAgo(ts){const d=Math.floor((Date.now()-ts)/3600000);if(d<1)return'เมื่อกี้';if(d<24)return d+' ชม.ที่แล้ว';const days=Math.floor(d/24);if(days<30)return days+' วันที่แล้ว';return Math.floor(days/30)+' เดือนที่แล้ว';}
-function renderR(rOverride){
-  const r=rOverride||loadR();
-  const total=r.length;
-  const avg=total?(r.reduce((s,x)=>s+x.stars,0)/total).toFixed(1):'—';
-  const five=r.filter(x=>x.stars===5).length;
-  document.getElementById('avgStar').textContent=total?avg+'⭐':'—';
-  document.getElementById('totalReviews').textContent=total;
-  document.getElementById('fiveStars').textContent=five;
-  const grid=document.getElementById('reviewsGrid');
-  if(!total){grid.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted);">💬 ยังไม่มีรีวิว เป็นคนแรกได้เลย!</div>';return;}
-  grid.innerHTML=r.map(x=>`
-    <div class="review-card">
-      <div class="review-card-top">
-        <div class="review-avatar">${x.name.charAt(0).toUpperCase()}</div>
-        <div><div class="review-name">${x.name}</div><div class="review-date">${timeAgo(x.date)}</div></div>
-      </div>
-      <div class="review-stars">${starsH(x.stars)}</div>
-      <div class="review-text">${x.text}</div>
-      ${x.tag?`<span class="review-tag-chip">${x.tag}</span>`:''}
-    </div>
-  `).join('');
-}
-function toggleTag(el){document.querySelectorAll('.tag-option').forEach(t=>t.classList.remove('selected'));el.classList.add('selected');}
-function openWriteReview(){
-  document.getElementById('reviewModal').classList.add('open');
-  document.getElementById('formView').style.display='block';
-  document.getElementById('successMsg').classList.remove('show');
-}
-function closeWriteReview(){
-  document.getElementById('reviewModal').classList.remove('open');
-  document.getElementById('inputName').value='';
-  document.getElementById('inputReview').value='';
-  document.querySelectorAll('input[name="stars"]').forEach(r=>r.checked=false);
-  document.querySelectorAll('.tag-option').forEach(t=>t.classList.remove('selected'));
-}
-function submitReview(){
-  const name=document.getElementById('inputName').value.trim();
-  const starsEl=document.querySelector('input[name="stars"]:checked');
-  const text=document.getElementById('inputReview').value.trim();
-  const tagEl=document.querySelector('.tag-option.selected');
-  if(!name){alert('กรุณาใส่ชื่อครับ');return;}
-  if(!starsEl){alert('กรุณาเลือกคะแนนดาวครับ');return;}
-  if(!text){alert('กรุณาเขียนรีวิวครับ');return;}
-  const btn=document.getElementById('submitBtn');
-  btn.disabled=true;btn.textContent='กำลังโพสต์...';
-  setTimeout(()=>{
-    const reviews=loadR();
-    reviews.unshift({id:Date.now(),name,stars:parseInt(starsEl.value),tag:tagEl?tagEl.textContent:'',text,date:Date.now()});
-    saveR(reviews);renderR(reviews);
-    document.getElementById('formView').style.display='none';
-    document.getElementById('successMsg').classList.add('show');
-    btn.disabled=false;btn.textContent='โพสต์รีวิว';
-  },600);
-}
-document.getElementById('reviewModal').addEventListener('click',function(e){if(e.target===this)closeWriteReview();});
-renderR();
-document.getElementById('reviewModal').addEventListener('click',function(e){if(e.target===this)closeWriteReview();});
 
 </script>
 </body>
